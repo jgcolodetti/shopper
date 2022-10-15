@@ -45,6 +45,9 @@ export default function OrderForm({ todayDate }) {
         if (nameInputError === true) {
             setNameInputError(false)
         }
+        if (succeedAlert === true) {
+            setSucceedAlert(false)
+        }
         if (e.target.value.trim() !== '' || !e.target.value) {
             setNameInput(e.target.value)
         } else {
@@ -95,19 +98,19 @@ export default function OrderForm({ todayDate }) {
 
     }
 
-    const removeListItem = (name) => {
-        const newItemList = itemList.filter((item) => {
+    const removeListItem = async (name) => {
+        const newItemList = await itemList.filter((item) => {
             return item.name !== name
         })
 
-        setItemList(newItemList)
+        await setItemList(newItemList)
     }
 
     useEffect(() => {
         if (searchInput !== '' && !chosenProduct.name) {
             axios.get(`/api/products?name=${searchInput}`)
                 .then((res) => {
-                    setProducts(res.data.products.filter((product) => {return product.qnty_stock > 0}))
+                    setProducts(res.data.products.filter((product) => { return product.qnty_stock > 0 }).filter((product) => { return !itemList.map((item) => { return item.name }).includes(product.name)}))
                 })
                 .catch((err) => {
                     setProducts([])
@@ -172,7 +175,7 @@ export default function OrderForm({ todayDate }) {
     return (
         <Flex justify={'center'} marginY={'10vh'}>
             <Flex w={{ base: '95%', lg: '70%' }} padding={{ base: '1rem', lg: '2rem' }} boxShadow={'xl'} borderRadius={'16px'} bg={'#E9F9F3'} flexDir={'column'} align={'center'} gap={{ base: '1.5rem', lg: '3rem' }}>
-                <Flex align={'flex-start'} gap={{ base: '15px', lg: '50px' }} justify={'flex-start'} w={'100%'} flexWrap={'wrap'} h={'4vh'}>
+                <Flex align={'flex-start'} gap={{ base: '15px', lg: '50px' }} justify={'flex-start'} w={'100%'} flexWrap={'wrap'} h={{ base: 'auto', lg: '4vh' }}>
                     <Text fontWeight={{ base: '700', lg: '600' }} fontSize={{ base: '1rem', lg: '1.2rem' }} w={{ base: '40%', lg: '21%' }} textAlign={{ base: 'left', lg: 'right' }}>
                         Nome:
                     </Text>
@@ -189,8 +192,7 @@ export default function OrderForm({ todayDate }) {
                     </Text>
                     <Flex w={{ base: '100%', lg: '30%' }}>
                         <Input
-                            defaultValue={todayDate}
-                            value={dateInput}
+                            value={dateInput !== '' ? dateInput : todayDate}
                             size="md"
                             type="date"
                             min={todayDate}
@@ -236,7 +238,7 @@ export default function OrderForm({ todayDate }) {
 
                 </Flex>
                 <Divider w={'90%'} />
-                <Flex minH={'60vh'} w={'100%'} flexDir={'column'} gap={{ base: '1.5rem', lg: '3rem' }}>
+                <Flex minH={{base:'90vh', lg:'80vh'}} w={'100%'} flexDir={'column'} gap={{ base: '1.5rem', lg: '3rem' }}>
                     <Text fontWeight={'600'} fontSize={{ base: '1rem', lg: '1.2rem' }} w={{ base: '100%', lg: '21%' }} textAlign={{ base: 'left', lg: 'right' }}>
                         Lista de compras:
                     </Text>
@@ -250,9 +252,10 @@ export default function OrderForm({ todayDate }) {
                                 qnty={item.qnty}
                                 qnty_stock={item.qnty_stock}
                                 removeListItem={removeListItem}
-                                onChangeQntyInput={onChangeQntyInput} />
+                                onChangeQntyInput={onChangeQntyInput} 
+                                />
                         })}
-                        {productsError && <Alert status='error' variant='solid' fontWeight={'700'} borderRadius={'16px'} w={'20%'} alignSelf={'center'} marginY={'auto'}><AlertIcon />Carrinho vazio !</Alert>}
+                        {productsError && <Alert status='error' variant='solid' fontWeight={'700'} borderRadius={'16px'} w={{base:'65%', lg: '20%'}} alignSelf={'center'} marginY={'auto'}><AlertIcon />Carrinho vazio !</Alert>}
                     </Flex>
                     <Flex justify={'space-between'} w={{ base: '100%', lg: '70%' }} alignSelf={'center'} flexDir={{ base: 'column', lg: 'row' }} gap={{ base: '1rem', lg: 0 }}>
                         <Text fontSize={{ base: '1rem', lg: '1.5rem' }} fontWeight={'500'}>
@@ -265,14 +268,14 @@ export default function OrderForm({ todayDate }) {
                             {loading && <Spinner />}
                         </Flex>
                     </Flex>
+                    {succeedAlert && <Flex alignSelf={'center'}>
+                        <Alert status='success' variant='solid' fontWeight={'700'} borderRadius={'16px'} w={'255px'}>
+                            <AlertIcon />
+                            Compra efetuada !
+                            <CloseButton marginLeft={'15px'} onClick={() => setSucceedAlert(false)} />
+                        </Alert>
+                    </Flex>}
                 </Flex >
-                {succeedAlert && <Flex>
-                    <Alert status='success' variant='solid' fontWeight={'700'} borderRadius={'16px'}>
-                        <AlertIcon />
-                        Compra efetuada !
-                        <CloseButton marginLeft={'15px'} onClick={() => setSucceedAlert(false)} />
-                    </Alert>
-                </Flex>}
             </Flex>
         </Flex>
 

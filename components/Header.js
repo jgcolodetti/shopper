@@ -9,10 +9,7 @@ export default function Header({ onHome, onOrder }) {
         <Flex justify={'center'} boxShadow={'md'} position={'sticky'} top={0} bg={'white'} zIndex={1}>
             <Flex p={{ base: '1rem', lg: '1.5rem' }} justify={'center'} align={'center'} flexGrow={'1'}>
                 <Flex justify={'center'} w={{ base: '27vw', lg: '20vw' }}>
-                    {/* <Text fontSize={{ base: '0.7rem', lg: '1rem' }}>
-                        ShopperLogo
-                    </Text> */}
-                    <Image src="/img/logo-shopper.png" width={'200px'} height={'50px'} />
+                    <Image src="/img/logo.svg" width={'200px'} height={'50px'} />
                 </Flex>
                 <Flex justify={'center'} w={{ base: '30vw', lg: '20vw' }}>
                     <Heading fontSize={{ base: '2xl', lg: '3xl' }}>

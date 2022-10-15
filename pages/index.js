@@ -9,7 +9,7 @@ export default function Home() {
   useEffect(() => {
       axios.get('/api/products')
         .then((res) => {
-          setProducts(res.data.products)
+          setProducts(res.data.products.filter((product) => { return product.qnty_stock > 0}))
         })
   })
 

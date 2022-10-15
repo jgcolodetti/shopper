@@ -16,7 +16,6 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data>
 ) {
-    const order_id = new GenerateId().createId()
     const orderDB = new OrderDatabase()
     const productDB = new ProductDatabase()
     const transaction = await orderDB.beginTransaction()
@@ -28,29 +27,23 @@ export default async function handler(
             if (!client_name || !delivery_date || !products) {
                 throw new Error('Campos incompletos')
             }
-            const order = new Order(order_id, client_name, delivery_date, products)
+            const order = new Order(client_name, delivery_date, products)
             const productsQntyStock = await productDB.getProductQuantity(order, transaction)
-            // console.log(products[0].qnty)
-            
+
             const unavaibleProducts = productsQntyStock.filter((item: any) => {
                 const orderSize = products.filter((product: any) => {
-                    // console.log(product.product_id, item[0].product_id)
                     return item[0].product_id === product.product_id
 
                 })[0].qnty
-                console.log(Number(orderSize), item[0].qnty_stock)
-                console.log(Number(orderSize) > item[0].qnty_stock)
                 return Number(orderSize) > item[0].qnty_stock
             })
 
-            console.log(unavaibleProducts)
             if (unavaibleProducts.length > 0) {
                 throw new Error('Estoque insuficiente')
             }
 
-            await orderDB.insertOrder(order, transaction)
-            await orderDB.insertOrderProduct(order, transaction)
-            // throw new Error('stop')
+            const order_id = await orderDB.insertOrder(order, transaction)
+            await orderDB.insertOrderProduct(order_id, order, transaction)
             await productDB.updateProductQuantity(order, transaction)
             await transaction.commit()
 
