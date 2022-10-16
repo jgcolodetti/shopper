@@ -8,7 +8,6 @@ export class ProductDatabase extends BaseDatabase {
     public async getProducts() {
         const result = await this.getConnection()
             .select("*")
-            // .limit(9)
             .from(ProductDatabase.TABLE_PRODUCTS)
 
         return result
@@ -18,9 +17,9 @@ export class ProductDatabase extends BaseDatabase {
         const result = await this.getConnection()
             .select('*')
             .whereLike('name', `%${name.toUpperCase()}%`)
-            // .where('name', name)
+            .orderBy('name')
             .from(ProductDatabase.TABLE_PRODUCTS)
-
+            
         return result
     }
 

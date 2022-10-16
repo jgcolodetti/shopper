@@ -4,7 +4,7 @@ import { DeleteIcon } from '@chakra-ui/icons'
 import { motion } from 'framer-motion'
 
 export default function ListItem({ name, price, qnty, qnty_stock, removeListItem, onChangeQntyInput }) {
-    const [ shouldRemove, setShouldRemove] = useState(false)
+    const [shouldRemove, setShouldRemove] = useState(false)
 
     useEffect(() => {
         if (shouldRemove) {
@@ -13,6 +13,10 @@ export default function ListItem({ name, price, qnty, qnty_stock, removeListItem
         }
 
     }, [shouldRemove])
+
+    const onClickRemove = () => {
+        setShouldRemove(true)
+    }
 
     const { getInputProps, getIncrementButtonProps, getDecrementButtonProps } =
         useNumberInput({
@@ -30,9 +34,6 @@ export default function ListItem({ name, price, qnty, qnty_stock, removeListItem
         onChangeQntyInput(name, input.value)
     })
 
-    const onClickRemove = () => {
-        setShouldRemove(true)
-    }
 
     return (
         <>

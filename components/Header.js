@@ -12,9 +12,11 @@ export default function Header({ onHome, onOrder }) {
                     <Image src="/img/logo.svg" width={'200px'} height={'50px'} />
                 </Flex>
                 <Flex justify={'center'} w={{ base: '30vw', lg: '20vw' }}>
-                    <Heading fontSize={{ base: '2xl', lg: '3xl' }}>
-                        SHOPPER
-                    </Heading>
+                    <Link href='/' style={{ textDecoration: 'none' }}>
+                        <Heading fontSize={{ base: '2xl', lg: '3xl' }}>
+                            SHOPPER
+                        </Heading>
+                    </Link>
                 </Flex>
                 <Flex justify={'center'} w={{ base: '33vw', lg: '20vw' }}>
                     {onHome ?
