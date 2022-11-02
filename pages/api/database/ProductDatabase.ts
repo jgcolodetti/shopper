@@ -1,52 +1,46 @@
-import { BaseDatabase } from "./BaseDatabase";
+import { connection } from "./DatabaseConnection";
 import { Product } from "../products";
 import Order from "../model/Order";
+import { TABLE_PRODUCTS } from "../tables/tables";
 
-export class ProductDatabase extends BaseDatabase {
-    public static TABLE_PRODUCTS = "shopper_products"
+export const getProducts = async () => {
+    const result = await connection(TABLE_PRODUCTS)
+        .select("*")
+        // .from("shopper_products")
 
-    public async getProducts() {
-        const result = await this.getConnection()
-            .select("*")
-            .from(ProductDatabase.TABLE_PRODUCTS)
+    return result
+}
 
-        return result
+export const getProductByName = async (name: string) => {
+    const result = await connection(TABLE_PRODUCTS)
+        .select('*')
+        .whereLike('name', `%${name.toUpperCase()}%`)
+        .orderBy('name')
+
+    return result
+}
+
+export const updateProductQuantity = async (order: Order, transaction: any) => {
+    const products = order.getProducts()
+
+    for (let i = 0; i < products.length; i++) {
+        await connection(TABLE_PRODUCTS)
+            .where({ product_id: products[i].product_id })
+            .update({ qnty_stock: products[i].qnty_stock - products[i].qnty })
+            .transacting(transaction)
     }
+}
 
-    public async getProductByName(name: string) {
-        const result = await this.getConnection()
-            .select('*')
-            .whereLike('name', `%${name.toUpperCase()}%`)
-            .orderBy('name')
-            .from(ProductDatabase.TABLE_PRODUCTS)
-            
-        return result
+export const getProductQuantity = async (order: Order, transaction: any) => {
+    const products = order.getProducts()
+    let response = []
+
+    for (let i = 0; i < products.length; i++) {
+        const result = await connection(TABLE_PRODUCTS)
+            .select('product_id', 'qnty_stock')
+            .where({ product_id: products[i].product_id })
+
+        response.push(result)
     }
-
-    public async updateProductQuantity(order: Order, transaction: any) {
-        const products = order.getProducts()
-
-        for (let i = 0; i < products.length; i++) {
-            await this.getConnection()
-                .where({ product_id: products[i].product_id })
-                .update({ qnty_stock: products[i].qnty_stock - products[i].qnty })
-                .from(ProductDatabase.TABLE_PRODUCTS)
-                .transacting(transaction)
-        }
-    }
-
-    public async getProductQuantity(order: Order, transaction: any) {
-        const products = order.getProducts()
-        let response = []
-
-        for (let i = 0; i < products.length; i++) {
-            const result = await this.getConnection()
-                .select( 'product_id', 'qnty_stock')
-                .where({ product_id: products[i].product_id })
-                .from(ProductDatabase.TABLE_PRODUCTS)
-            response.push(result)
-        }
-        return response
-    }
-
+    return response
 }

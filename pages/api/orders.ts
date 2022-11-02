@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { OrderDatabase } from './database/OrderDatabase'
-import { ProductDatabase } from './database/ProductDatabase'
+import { beginTransaction } from './database/DatabaseConnection'
+import { insertOrder, insertOrderProduct } from './database/OrderDatabase'
+import { getProductQuantity, updateProductQuantity } from './database/ProductDatabase'
 import Order from './model/Order'
 
 type Data = {
@@ -11,9 +12,8 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data>
 ) {
-    const orderDB = new OrderDatabase()
-    const productDB = new ProductDatabase()
-    const transaction = await orderDB.beginTransaction()
+
+    let transaction = undefined
 
     try {
         if (req.method !== 'POST') {
@@ -22,31 +22,33 @@ export default async function handler(
         }
 
         const { client_name, delivery_date, products } = req.body
-        const order = new Order(client_name, delivery_date, products)
 
         if (!client_name || !delivery_date || !products) {
-            res.status(400).json({ message: 'Campos incompletos'})
+            res.status(400).json({ message: 'Campos incompletos.' })
             return
         }
- 
-        if (!areProductsAvailable(order, transaction, products, productDB)) {
+
+        const order = new Order(client_name, delivery_date, products)
+        transaction = await beginTransaction()
+
+        if (!areProductsAvailable(order, transaction, products)) {
             throw new Error('Estoque insuficiente.')
         }
 
-        const order_id = await orderDB.insertOrder(order, transaction)
-        await orderDB.insertOrderProduct(order_id, order, transaction)
-        await productDB.updateProductQuantity(order, transaction)
+        const order_id = await insertOrder(order, transaction)
+        await insertOrderProduct(order_id, order, transaction)
+        await updateProductQuantity(order, transaction)
         await transaction.commit()
 
         res.status(201).json({ message: 'Pedido realizado com sucesso.' })
     } catch (err: any) {
-        await transaction.rollback()
+        transaction?.rollback()
         res.status(500).send(err)
     }
 }
 
-async function areProductsAvailable(order: Order, transaction: any, products: any, productDB: ProductDatabase) {
-    const productsQntyStock = await productDB.getProductQuantity(order, transaction)
+async function areProductsAvailable(order: Order, transaction: any, products: any) {
+    const productsQntyStock = await getProductQuantity(order, transaction)
 
     const unavailableProducts = productsQntyStock.filter((item: any) => {
         const orderSize = products.filter((product: any) => {

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { ProductDatabase } from './database/ProductDatabase'
+import { connection } from './database/DatabaseConnection'
+import { getProductByName, getProducts } from './database/ProductDatabase'
 
 export type Product = {
   product_id: number,
@@ -17,10 +18,10 @@ export default async function handler(
     const name = req.query.name as string
     
     if (!name || name.trim() === '') {
-      const productDB = await new ProductDatabase().getProducts()
+      const productDB = await getProducts()
       res.status(200).json({ products: productDB })
     } else {
-      const productDB = await new ProductDatabase().getProductByName(name)
+      const productDB = await getProductByName(name)
       res.status(200).json({ products: productDB })
     }
 
