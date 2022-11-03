@@ -20,14 +20,14 @@ export default async function handler(
             res.status(400).json({ message: 'Only Post requests are allowed.' })
             return
         }
-
+    
         const { client_name, delivery_date, products } = req.body
-
+        
         if (!client_name || !delivery_date || !products) {
             res.status(400).json({ message: 'Campos incompletos.' })
             return
         }
-
+        
         const order = new Order(client_name, delivery_date, products)
         transaction = await beginTransaction()
 
@@ -42,16 +42,18 @@ export default async function handler(
 
         res.status(201).json({ message: 'Pedido realizado com sucesso.' })
     } catch (err: any) {
+        console.log(err)
         transaction?.rollback()
         res.status(500).send(err)
     }
 }
 
-async function areProductsAvailable(order: Order, transaction: any, products: any) {
+export async function areProductsAvailable(order: Order, transaction: any, products: any) {
     const productsQntyStock = await getProductQuantity(order, transaction)
 
     const unavailableProducts = productsQntyStock.filter((item: any) => {
         const orderSize = products.filter((product: any) => {
+            
             return item[0].product_id === product.product_id
         })[0].qnty
         return Number(orderSize) > item[0].qnty_stock
