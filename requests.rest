@@ -1,0 +1,26 @@
+### 1) Get prodcuts
+GET http://localhost:3000/api/products
+Content-Type: application/json
+
+
+### 2) Get products by name
+GET http://localhost:3000/api/products?name=ener
+Content-Type: application/json
+
+### 3) Insert order
+
+POST http://localhost:3000/api/orders
+Content-Type: application/json
+
+{
+    "client_name": "teste",
+    "delivery_date": "1111-11-11",
+    "products": [{
+        "product_id": 2,
+        "name": "produto-teste",
+        "price": 1,
+        "qnty_stock": 15,
+        "qnty": 1
+    }]
+}
+

@@ -19,27 +19,13 @@ export default function OrderForm({ todayDate }) {
     const [succeedAlert, setSucceedAlert] = useState(false)
     const [nameInputError, setNameInputError] = useState(false)
     const [productsError, setProductsError] = useState(false)
-    const [shouldResetPage, setShouldResetPage] = useState(false)
+    const [shouldResetPageSucceed, setShouldResetPageSucceed] = useState(false)
+    const [shouldResetPageError, setShouldResetPageError] = useState(false)
 
     useEffect(() => {
         setSucceedAlert(false)
         setLoading(false)
     }, [])
-
-    useEffect(() => {
-        if (shouldResetPage) {
-            setItemList([])
-            setNameInput('')
-            setSearchInput('')
-            setDateInput(todayDate)
-            setChosenProduct({})
-            setLoading(false)
-            setSucceedAlert(true)
-            setNameInputError(false)
-            setProductsError(false)
-            setShouldResetPage(false)
-        }
-    }, [shouldResetPage])
 
     const onChangeNameInput = (e) => {
         if (nameInputError === true) {
@@ -147,6 +133,35 @@ export default function OrderForm({ todayDate }) {
         setItemList(newItemList)
     }
 
+    useEffect(() => {
+        if (shouldResetPageSucceed) {
+            setItemList([])
+            setNameInput('')
+            setSearchInput('')
+            setDateInput(todayDate)
+            setChosenProduct({})
+            setLoading(false)
+            setSucceedAlert(true)
+            setNameInputError(false)
+            setProductsError(false)
+            setShouldResetPageSucceed(false)
+        }
+    }, [shouldResetPageSucceed])
+
+    useEffect(() => {
+        if (shouldResetPageError) {
+            setItemList([])
+            setNameInput('')
+            setSearchInput('')
+            setDateInput(todayDate)
+            setChosenProduct({})
+            setLoading(false)
+            setNameInputError(false)
+            setProductsError(false)
+            setShouldResetPageError(false)
+        }
+    }, [shouldResetPageError])
+
     const orderItems = (client_name, delivery_date, products) => {
         if (client_name.trim().length === 0) {
             setNameInputError(true)
@@ -162,10 +177,11 @@ export default function OrderForm({ todayDate }) {
             }
             axios.post('/api/orders', body,)
                 .then((res) => {
-                    setShouldResetPage(true)
+                    setShouldResetPageSucceed(true)
                 })
                 .catch((err) => {
-                    console.log(err)
+                    alert('Estoque insuficiente, tente novamente.')
+                    setShouldResetPageError(true)
                 })
         } else {
             return

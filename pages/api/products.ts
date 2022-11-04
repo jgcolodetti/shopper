@@ -15,13 +15,21 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
+
+    if (req.method !== 'GET') {
+      res.status(400).json({ message: 'Only GET requests are allowed.' })
+      return
+    }
+
     const name = req.query.name as string
-    
+
     if (!name || name.trim() === '') {
       const productDB = await getProducts()
+
       res.status(200).json({ products: productDB })
     } else {
       const productDB = await getProductByName(name)
+      
       res.status(200).json({ products: productDB })
     }
 
